@@ -13,28 +13,16 @@ def create_app(test_config=None):
   # create and configure the app
   app = Flask(__name__)
   setup_db(app)
-  
-  '''
-  @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
-  '''
-  cors = CORS(app, resources={r"*": {"origins": "*"}})
+  CORS(app, resources={r"*": {"origins": "*"}})
 
   '''
   @TODO: Use the after_request decorator to set Access-Control-Allow
   '''
 
-  '''
-  @TODO: 
-  Create an endpoint to handle GET requests 
-  for all available categories.
-  '''
   @app.route('/categories')
   def get_categories():
     categories = Category.query.all()
-
-    result = []
-    for category in categories:
-      result.append(category.format())
+    result = [category.format() for category in categories]
 
     return jsonify({
       'success': True,
@@ -43,45 +31,31 @@ def create_app(test_config=None):
     })
 
 
-  '''
-  @TODO: 
-  Create an endpoint to handle GET requests for questions, 
-  including pagination (every 10 questions). 
-  This endpoint should return a list of questions, 
-  number of total questions, current category, categories. 
-
-  TEST: At this point, when you start the application
-  you should see questions and categories generated,
-  ten questions per page and pagination at the bottom of the screen for three pages.
-  Clicking on the page numbers should update the questions. 
-  '''
   @app.route('/questions')
   def get_questions():
     page = request.args.get('page', 1, int)
     questions = Question.query.all()
+    categories = Category.query.all()
 
     paginate_questions = paginate_data(questions, page)
-    result = []
-    for question in questions:
-      result.append(question.format())
-
+    question_result = [question.format() for question in paginate_questions]
+    categories_result = [category.format() for category in categories]
+  
     return jsonify({
       'success': True,
-      'data': result,
-      'total': len(questions)
+      'data': {
+        'questions': question_result,
+        'categories': categories_result
+      },
+      'total': len(questions),
+      'category': 'All'
     })
 
-  '''
-  @TODO: 
-  Create an endpoint to DELETE question using a question ID. 
-
-  TEST: When you click the trash icon next to a question, the question will be removed.
-  This removal will persist in the database and when you refresh the page. 
-  '''
+  
   @app.route('/question/<int:question_id>', methods=['DELETE'])
   def delete_question(question_id):
     question = Question.query.get(question_id)
-    print(question)
+
     if question is None:
       return abort(400)
 
@@ -121,20 +95,16 @@ def create_app(test_config=None):
       'success': True
     })
 
-  '''
-  @TODO: 
-  Create a POST endpoint to get questions based on a search term. 
-  It should return any questions for whom the search term 
-  is a substring of the question. 
+  @app.route('/questions', methods=['POST'])
+  def search_questions():
+    data = request.get_json()
+    search_term = data.get('search_term')
 
-  TEST: Search by any phrase. The questions list will update to include 
-  only question that include that string within their question. 
-  Try using the word "title" to start. 
-  '''
-  @app.route('/questions/<search_term>', methods=['POST'])
-  def search_questions(search_term):
-    questions = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
-    result = [question.format() for question in questions]
+    if 'search_term' in data:
+      questions = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
+      result = [question.format() for question in questions]
+    else:
+      return abort(400)
     
     return jsonify({
       'success': True,
@@ -142,23 +112,17 @@ def create_app(test_config=None):
       'total': len(result)
     })
 
-  '''
-  @TODO: 
-  Create a GET endpoint to get questions based on category. 
 
-  TEST: In the "List" tab / main screen, clicking on one of the 
-  categories in the left column will cause only questions of that 
-  category to be shown. 
-  '''
-  @app.route('/category/<category_type>')
-  def get_question_from_category(category_type):
-    questions = Question.query.join(Category, Question.category == Category.id).filter(Category.type == category_type.capitalize()).all()
+  @app.route('/category/<int:category_id>/questions')
+  def get_question_from_category(category_id):
+    questions = Question.query.join(Category, Question.category == Category.id).filter(Category.id == category_id).all()
     result = [question.format() for question in questions]
 
     return jsonify({
       'success': True,
       'data': result,
-      'total': len(questions)
+      'total': len(questions),
+      'category': category_id
     })
 
   '''
