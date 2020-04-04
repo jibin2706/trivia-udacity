@@ -16,9 +16,13 @@ def create_app(test_config=None):
   setup_db(app)
   CORS(app, resources={r"*": {"origins": "*"}})
 
-  '''
-  @TODO: Use the after_request decorator to set Access-Control-Allow
-  '''
+
+  @app.after_request
+  def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,DELETE')
+    return response
 
   @app.route('/categories')
   def get_categories():
@@ -31,7 +35,6 @@ def create_app(test_config=None):
       'total': len(categories)
     })
 
-
   @app.route('/questions')
   def get_questions():
     page = request.args.get('page', 1, int)
@@ -41,7 +44,10 @@ def create_app(test_config=None):
     paginate_questions = paginate_data(questions, page)
     question_result = [question.format() for question in paginate_questions]
     categories_result = [category.format() for category in categories]
-  
+
+    if question_result == []:
+      return abort(400)
+
     return jsonify({
       'success': True,
       'data': {
@@ -51,11 +57,11 @@ def create_app(test_config=None):
       'total': len(questions),
       'category': 'All'
     })
-
-  
+ 
   @app.route('/question/<int:question_id>', methods=['DELETE'])
   def delete_question(question_id):
     question = Question.query.get(question_id)
+    print(question)
 
     if question is None:
       return abort(400)
@@ -68,20 +74,8 @@ def create_app(test_config=None):
     return jsonify({
       'success': True,
       'question_id': question_id
-    })
+    }), 200
 
-
-
-  '''
-  @TODO: 
-  Create an endpoint to POST a new question, 
-  which will require the question and answer text, 
-  category, and difficulty score.
-
-  TEST: When you submit a question on the "Add" tab, 
-  the form will clear and the question will appear at the end of the last page
-  of the questions list in the "List" tab.  
-  '''
   @app.route('/question', methods=['POST'])
   def add_question():
     data = request.get_json()
@@ -113,7 +107,6 @@ def create_app(test_config=None):
       'total': len(result)
     })
 
-
   @app.route('/category/<int:category_id>/questions')
   def get_question_from_category(category_id):
     questions = Question.query.join(Category, Question.category == Category.id).filter(Category.id == category_id).all()
@@ -126,17 +119,6 @@ def create_app(test_config=None):
       'category': category_id
     })
 
-  '''
-  @TODO: 
-  Create a POST endpoint to get questions to play the quiz. 
-  This endpoint should take category and previous question parameters 
-  and return a random questions within the given category, 
-  if provided, and that is not one of the previous questions. 
-
-  TEST: In the "Play" tab, after a user selects "All" or a category,
-  one question at a time is displayed, the user is allowed to answer
-  and shown whether they were correct or not. 
-  '''
   @app.route('/quiz/question', methods=['POST'])
   def next_question():
     data = request.get_json()
