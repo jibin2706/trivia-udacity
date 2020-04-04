@@ -140,10 +140,16 @@ def create_app(test_config=None):
   @app.route('/quiz/question', methods=['POST'])
   def next_question():
     data = request.get_json()
-    question = Question.query.join(Category, Question.category == Category.id)\
-    .filter(and_(Category.id == data['category'], ColumnOperators.notin_(Question.id, data['previous_questions'])))\
-    .order_by(func.random())\
-    .first()
+    if data['category'] == 0:
+      question = Question.query.join(Category, Question.category == Category.id)\
+      .filter(ColumnOperators.notin_(Question.id, data['previous_questions']))\
+      .order_by(func.random())\
+      .first()
+    else:  
+      question = Question.query.join(Category, Question.category == Category.id)\
+      .filter(and_(Category.id == data['category'], ColumnOperators.notin_(Question.id, data['previous_questions'])))\
+      .order_by(func.random())\
+      .first()
     
     if question is None:
       return abort(400)
