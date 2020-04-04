@@ -1,44 +1,237 @@
-# Full Stack API Final Project
+# Full Stack Trivia
 
-## Full Stack Trivia
+## Getting Started
 
-Udacity is invested in creating bonding experiences for its employees and students. A bunch of team members got the idea to hold trivia on a regular basis and created a webpage to manage the trivia app and play the game, but their API experience is limited and still needs to be built out.
+Project is divided into `frontend` and `backend` directory.
 
-That's where you come in! Help them finish the trivia app so they can start holding trivia and seeing who's the most knowledgeable of the bunch. The application must:
+Technologies used in the project:
+**Frontend**
 
-1. Display questions - both all questions and by category. Questions should show the question, category and difficulty rating by default and can show/hide the answer.
-2. Delete questions.
-3. Add questions and require that they include question and answer text.
-4. Search for questions based on a text query string.
-5. Play the quiz game, randomizing either all questions or within a specific category.
+- React
+- React Router
+- Jquery
 
-Completing this trivia app will give you the ability to structure plan, implement, and test an API - skills essential for enabling your future applications to communicate with others.
+**Backend**
 
-## Tasks
+- Flask
+- SQLAlchemy
+- Flask CORS
 
-There are `TODO` comments throughout project. Start by reading the READMEs in:
+**Database**
 
-1. [`./frontend/`](./frontend/README.md)
-2. [`./backend/`](./backend/README.md)
+- PostgresSQL
 
-We recommend following the instructions in those files in order. This order will look familiar from our prior work in the course.
+## Installation
 
-## Starting and Submitting the Project
+**Frontend**
 
-[Fork](https://help.github.com/en/articles/fork-a-repo) the [project repository]() and [Clone](https://help.github.com/en/articles/cloning-a-repository) your forked repository to your machine. Work on the project locally and make sure to push all your changes to the remote repository before submitting the link to your repository in the Classroom.
+```bash
+cd frontend/
+# Installing dependencies
+npm install
+# Starting the project
+npm run start
+```
 
-## About the Stack
+**Backend**
+Creating db and populating data.
 
-We started the full stack application for you. It is desiged with some key functional areas:
+**_NOTE: Make sure postgres in running_**
 
-### Backend
+```bash
+# Creating db
+createdb trivia
 
-The `./backend` directory contains a partially completed Flask and SQLAlchemy server. You will work primarily in app.py to define your endpoints and can reference models.py for DB and SQLAlchemy setup.
+cd backend/
 
-### Frontend
+# Populating database with tables and related data
+psql trivia < trivia.psql
+```
 
-The `./frontend` directory contains a complete React frontend to consume the data from the Flask server. You will need to update the endpoints after you define them in the backend. Those areas are marked with TODO and can be searched for expediency.
+```bash
+# Creating virtual environment
+virtualenv venv
 
-Pay special attention to what data the frontend is expecting from each API response to help guide how you format your API.
+# Activating virtual environment
+source venv/bin/activate
 
-[View the README.md within ./frontend for more details.](./frontend/README.md)
+# Install packages
+pip install -r requirements.txt
+
+# Start your project in development mode
+export FLASK_APP=flaskr
+export FLASK_ENV=development
+flask run
+```
+
+## API Documentation
+
+**_API follows Restful API convenctions._**
+
+The main data returned for both success and failed responses are in the `data` object. For failed response data contains the message of why it failed and for successfull response data is the main thing requested by the client. Although, other supporting data will be contained in the successful response.
+
+```JSON
+{
+    "success": true/false,
+    "data": "main data here",
+    ...
+}
+```
+
+### Endpoints
+
+**/categories** [GET]
+
+Sample Response:
+
+```JSON
+{
+  "data": [
+    {
+      "id": 1,
+      "type": "Science"
+    },
+    {
+      "id": 2,
+      "type": "Art"
+    },
+    {
+      "id": 3,
+      "type": "Geography"
+    },
+    {
+      "id": 4,
+      "type": "History"
+    },
+    {
+      "id": 5,
+      "type": "Entertainment"
+    },
+    {
+      "id": 6,
+      "type": "Sports"
+    }
+  ],
+  "success": true,
+  "total": 6
+}
+```
+
+---
+
+**/questions?page=1** [GET]
+
+_NOTE: Only 10 questions are returned per page_
+
+Sample Response:
+
+```JSON
+{
+  "category": "All",
+  "data": {
+    "categories": [
+      {
+        "id": 1,
+        "type": "Science"
+      },
+      ...
+    ],
+    "questions": [
+      {
+        "answer": "Uruguay",
+        "category": 6,
+        "difficulty": 4,
+        "id": 11,
+        "question": "Which country won the first ever soccer World Cup in 1930?"
+      },
+      ...
+    ],
+  "success": true,
+  "total": 31
+}
+```
+
+**/questions/\<int:question_id\>** Request Type: [DELETE]
+
+Sample Response:
+
+```JSON
+{
+  "success": true
+}
+```
+
+---
+
+**/questions** Request Type: [POST]
+
+Data: `{"search": "won"}`
+
+Sample Response:
+
+```JSON
+{
+  "success": true,
+  "data": [
+      {
+        "answer": "Uruguay",
+        "category": 6,
+        "difficulty": 4,
+        "id": 11,
+        "question": "Which country won the first ever soccer World Cup in 1930?"
+      }
+  ],
+  "total": 1
+}
+```
+
+---
+
+**/category/\<int:category_id\>/questions** Request Type: [GET]
+
+Sample Response:
+
+```JSON
+{
+  "category": 1,
+  "data": [
+    {
+      "answer": "The Liver",
+      "category": 1,
+      "difficulty": 4,
+      "id": 20,
+      "question": "What is the heaviest organ in the human body?"
+    },
+    {
+      "answer": "Alexander Fleming",
+      "category": 1,
+      "difficulty": 3,
+      "id": 21,
+      "question": "Who discovered penicillin?"
+    }
+  ],
+  "success": true,
+  "total": 2
+}
+```
+
+---
+
+**/quiz/question** Request Type: [POST]
+
+Data: `{"category": 1, "previous_questions": [23]}`
+
+Sample Response:
+
+```json
+{
+  "data": {
+    "answer": "The Liver",
+    "category": 1,
+    "difficulty": 4,
+    "id": 20,
+    "question": "What is the heaviest organ in the human body?"
+  },
+  "success": true
+}
+```
