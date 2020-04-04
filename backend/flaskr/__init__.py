@@ -2,6 +2,7 @@ import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_, func
+from sqlalchemy.sql.operators import ColumnOperators
 from flask_cors import CORS
 import random
 
@@ -140,12 +141,12 @@ def create_app(test_config=None):
   def next_question():
     data = request.get_json()
     question = Question.query.join(Category, Question.category == Category.id)\
-      .filter(and_(Category.id == data['category'], Question.id != data['previous_question_id']))\
-      .order_by(func.random())\
-      .first()
+    .filter(and_(Category.id == data['category'], ColumnOperators.notin_(Question.id, data['previous_questions'])))\
+    .order_by(func.random())\
+    .first()
     
     if question is None:
-      return abort(422)
+      return abort(400)
 
     return jsonify({
       'success': True,
@@ -159,28 +160,28 @@ def create_app(test_config=None):
     return jsonify({
       'success': False,
       'data': 'Bad Request'
-    })
+    }), 400
 
   @app.errorhandler(404)
   def page_not_found(e):
     return jsonify({
       'success': False,
       'data': 'Page not found'
-    })
+    }), 404
   
   @app.errorhandler(405)
   def page_not_found(e):
     return jsonify({
       'success': False,
       'data': 'Method not allowed'
-    })
+    }), 405
   
   @app.errorhandler(422)
   def page_not_found(e):
     return jsonify({
       'success': False,
       'data': 'Request cannot be processed'
-    })
+    }), 422
 
 
   # Utility functions
