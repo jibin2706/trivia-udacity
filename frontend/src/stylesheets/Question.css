@@ -6,6 +6,14 @@
 .categories-list {
   flex-basis: 25%;
   flex-shrink: 2;
+  padding: 0 1rem;
+}
+
+.categories-list > ul li {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
 }
 
 .categories-list > form {
@@ -19,7 +27,7 @@
 
 .Question-holder {
   padding: 10px 20px;
-  border: 2px black solid;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   text-align: left;
   margin: 7px;
 }
@@ -39,7 +47,6 @@
 }
 
 .answer-holder {
-  font-size: 25px;
   height: 25px;
   margin: 5px 0px;
 }
@@ -67,7 +74,8 @@ span.page-num.active {
 }
 
 img.category {
-  width: 30px;
+  width: 22px;
+  margin-left: 1rem;
 }
 
 img.delete {

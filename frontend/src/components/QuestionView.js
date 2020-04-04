@@ -12,7 +12,7 @@ class QuestionView extends Component {
       questions: [],
       page: 1,
       totalQuestions: 0,
-      categories: {},
+      categories: [],
       currentCategory: null,
     };
   }
@@ -28,7 +28,7 @@ class QuestionView extends Component {
       success: (result) => {
         this.setState({
           questions: result.data.questions,
-          categories: result.data.categories.map((category) => category.type),
+          categories: result.data.categories,
           totalQuestions: result.total,
           currentCategory: result.data.category,
         });
@@ -138,18 +138,15 @@ class QuestionView extends Component {
             Categories
           </h2>
           <ul>
-            {Object.keys(this.state.categories).map((id) => (
+            {this.state.categories.map((category) => (
               <li
-                key={id}
+                key={category.id}
                 onClick={() => {
-                  this.getByCategory(id);
+                  this.getByCategory(category.id);
                 }}
               >
-                {this.state.categories[id]}
-                <img
-                  className="category"
-                  src={`${this.state.categories[id]}.svg`}
-                />
+                {category.type}
+                <img className="category" src={`${category.type}.svg`} />
               </li>
             ))}
           </ul>
@@ -162,7 +159,7 @@ class QuestionView extends Component {
               key={q.id}
               question={q.question}
               answer={q.answer}
-              category={this.state.categories[q.category]}
+              category={this.state.categories[q.category - 1].type}
               difficulty={q.difficulty}
               questionAction={this.questionAction(q.id)}
             />

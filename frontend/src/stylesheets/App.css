@@ -2,6 +2,7 @@
   background-color: #222;
   color: white;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   height: 75px;
   padding: 20px;
@@ -13,17 +14,13 @@
   color: dodgerblue;
 }
 
+.App-header a {
+  color: unset;
+  text-decoration: none;
+}
+
 .App-intro {
   font-size: large;
-}
-
-h2 {
-  text-align: center;
-}
-
-li {
-  text-align: center;
-  margin: 5px 0px;
 }
 
 ul {
